@@ -47,10 +47,34 @@ if __name__ == "__main__":
         #print(f'{g}: {z.mean()}')
         genre_score_averages[g] = z.mean()
 
-    print(genre_score_averages)
+    #print(genre_score_averages)
+
+    # plot
 
     # ----- STREAMING SERVICE ----- #
     # number per streaming service
+    platforms = [
+        "Hulu",
+        "Netflix",
+        "Peacock"
+    ]
+
+    platform_counts = {
+        "Hulu": 0,
+        "Netflix": 0,
+        "Peacock": 0
+    }
+
+    temp_sum = 0
+    for p in platforms:
+        platform_count = len(df.loc[df["Platform"] == p])
+        platform_counts[p] = platform_count
+        temp_sum += platform_count
+
+    # Other
+    platform_counts["Other"] = num_movies - temp_sum
+
+    #print(platform_counts)
 
     # pie chart streaming service
 
