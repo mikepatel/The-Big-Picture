@@ -29,8 +29,8 @@ if __name__ == "__main__":
     # ----- GENRES ----- #
     genres = df["Genre"].unique()
     genre_counts = df["Genre"].value_counts()
-
     #print(genre_counts)
+
     # plot number per genre
 
     # ----- COMPLETION PERCENTAGE ----- #
@@ -40,6 +40,14 @@ if __name__ == "__main__":
 
     # ----- SCORE ----- #
     # average score per genre
+    genre_score_averages = pd.Series()
+    for g in genres:
+        x = df.loc[df["Genre"] == g]
+        z = pd.Series(x["Score"])
+        #print(f'{g}: {z.mean()}')
+        genre_score_averages[g] = z.mean()
+
+    print(genre_score_averages)
 
     # ----- STREAMING SERVICE ----- #
     # number per streaming service
