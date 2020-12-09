@@ -10,6 +10,7 @@ Project description:
 # Imports
 import os
 import pandas as pd
+import string
 
 
 ################################################################################
@@ -80,4 +81,19 @@ if __name__ == "__main__":
 
     # ----- FIRST LETTER ----- #
     # number per first letter in title
+    letters = list(string.ascii_uppercase)
+    digits = list(string.digits)
+    alphanumeric = letters + digits
+
+    letter_counts = {}
+    # initialize
+    for c in alphanumeric:
+        letter_counts[c] = 0
+
+    for index, row in df.iterrows():
+        letter = row["Title"][0]
+        letter_counts[letter] += 1
+
+    print(letter_counts)
+
     quit()
