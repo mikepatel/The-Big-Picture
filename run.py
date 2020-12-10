@@ -63,6 +63,7 @@ if __name__ == "__main__":
     # racing bar
     plt.style.use("dark_background")
     fig, ax = plt.subplots(figsize=(15, 10))
+    colours = cm.rainbow(range(len(genres)))
 
     #print(counts)
 
@@ -81,9 +82,14 @@ if __name__ == "__main__":
             #print(g)
             counts_df.loc[counts_df["Genre"] == g, "Count"] += 1
 
-        counts_df["Rank"] = counts_df["Count"].rank(method="first")
+        counts_df["Rank"] = counts_df["Count"].rank(method="first", ascending=True)
+        counts_df = counts_df.sort_values(by="Rank", ascending=False)
+        counts_df = counts_df.reset_index(drop=True)
+
+        # plot
         ax.clear()
-        ax.bar(counts_df["Rank"], counts_df["Count"])
+
+        ax.barh(counts_df["Rank"], counts_df["Count"], color=colours)
 
     gif_filepath = os.path.join(os.getcwd(), "genre_race.gif")
     animator = animation.FuncAnimation(fig, draw_chart, frames=range(len(df)), interval=800)
