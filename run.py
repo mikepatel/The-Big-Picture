@@ -98,8 +98,8 @@ if __name__ == "__main__":
             ax.text(x=0, y=row["Rank"], s=str(row["Genre"]), ha="right", va="center")  # base axis
             ax.text(x=row["Count"], y=row["Rank"], s=row["Count"], ha="left", va="center")  # bar
 
-    gif_filepath = os.path.join(os.getcwd(), "genre_race.gif")
-    animator = animation.FuncAnimation(fig, draw_chart, frames=range(len(df)), interval=800)
+    gif_filepath = os.path.join(os.getcwd(), "racing_bar_genre.gif")
+    animator = animation.FuncAnimation(fig, draw_chart, frames=range(len(df)), interval=300)
     animator.save(gif_filepath, writer="imagemagick")
 
     quit()
