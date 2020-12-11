@@ -60,6 +60,7 @@ if __name__ == "__main__":
     plt.show()
     """
 
+    """
     # racing bar
     plt.style.use("dark_background")
     fig, ax = plt.subplots(figsize=(15, 10))
@@ -82,7 +83,8 @@ if __name__ == "__main__":
             g = row["Genre"]
             counts_df.loc[counts_df["Genre"] == g, "Count"] += 1
 
-        counts_df["Rank"] = counts_df["Count"].rank(method="first", ascending=True).values
+        #counts_df["Rank"] = counts_df["Count"].rank(method="first", ascending=True).values
+        counts_df["Rank"] = counts_df["Count"].rank(method="first")
         #counts_df = counts_df.sort_values(by="Rank", ascending=False)
         #counts_df = counts_df.reset_index(drop=True)
 
@@ -96,13 +98,12 @@ if __name__ == "__main__":
 
         for index, row in counts_df.iterrows():
             ax.text(x=0, y=row["Rank"], s=str(row["Genre"]), ha="right", va="center")  # base axis
-            ax.text(x=row["Count"], y=row["Rank"], s=row["Count"], ha="left", va="center")  # bar
+            ax.text(x=row["Count"]+0.01, y=row["Rank"]+0.01, s=row["Count"], ha="left", va="center")  # bar
 
     gif_filepath = os.path.join(os.getcwd(), "racing_bar_genre.gif")
     animator = animation.FuncAnimation(fig, draw_chart, frames=range(len(df)), interval=300)
     animator.save(gif_filepath, writer="imagemagick")
-
-    quit()
+    """
 
     # ----- COMPLETION PERCENTAGE ----- #
     num_finished_yes = len(df.loc[df["Finished"] == "Yes"])
@@ -111,7 +112,7 @@ if __name__ == "__main__":
 
     # ----- SCORE ----- #
     # average score per genre
-    genre_score_averages = pd.Series()
+    genre_score_averages = pd.Series(dtype="float32")
     for g in genres:
         x = df.loc[df["Genre"] == g]
         z = pd.Series(x["Score"])
@@ -121,6 +122,20 @@ if __name__ == "__main__":
     #print(genre_score_averages)
 
     # plot
+    plt.style.use("dark_background")
+    fig, ax = plt.subplots(figsize=(15, 10))
+    colours = cm.rainbow(np.linspace(0, 1, len(genres)))
+    ax.clear()
+    ax.bar(genres, genre_score_averages, color=colours)
+    ax.set_title("Average score per genre")
+    #ax.set_xlabel("Genre")
+    ax.set_ylabel("Average user score")
+
+    for i in range(len(genre_score_averages)):
+        ax.annotate(f'{genre_score_averages[i]:.04f}', (i-0.1, genre_score_averages[i]+0.001))
+
+    plt.savefig("bar_avg_score")
+    quit()
 
     # ----- STREAMING SERVICE ----- #
     # number per streaming service
