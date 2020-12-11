@@ -63,7 +63,8 @@ if __name__ == "__main__":
     # racing bar
     plt.style.use("dark_background")
     fig, ax = plt.subplots(figsize=(15, 10))
-    colours = cm.rainbow(range(len(genres)))
+    colours = plt.cm.Dark2(range(len(genres)))
+    colours = cm.rainbow(np.linspace(0, 1, len(genres)))
 
     #print(counts)
 
@@ -79,17 +80,23 @@ if __name__ == "__main__":
 
         for index, row in df.iterrows():
             g = row["Genre"]
-            #print(g)
             counts_df.loc[counts_df["Genre"] == g, "Count"] += 1
 
-        counts_df["Rank"] = counts_df["Count"].rank(method="first", ascending=True)
-        counts_df = counts_df.sort_values(by="Rank", ascending=False)
-        counts_df = counts_df.reset_index(drop=True)
+        counts_df["Rank"] = counts_df["Count"].rank(method="first", ascending=True).values
+        #counts_df = counts_df.sort_values(by="Rank", ascending=False)
+        #counts_df = counts_df.reset_index(drop=True)
 
         # plot
         ax.clear()
-
         ax.barh(counts_df["Rank"], counts_df["Count"], color=colours)
+        ax.set_title("Count by Genre")
+        [spine.set_visible(False) for spine in ax.spines.values()]  # remove border around figure
+        ax.get_xaxis().set_visible(False)  # hide x-axis
+        ax.get_yaxis().set_visible(False)  # hide y-axis
+
+        for index, row in counts_df.iterrows():
+            ax.text(x=0, y=row["Rank"], s=str(row["Genre"]), ha="right", va="center")  # base axis
+            ax.text(x=row["Count"], y=row["Rank"], s=row["Count"], ha="left", va="center")  # bar
 
     gif_filepath = os.path.join(os.getcwd(), "genre_race.gif")
     animator = animation.FuncAnimation(fig, draw_chart, frames=range(len(df)), interval=800)
