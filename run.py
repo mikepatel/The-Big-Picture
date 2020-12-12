@@ -106,11 +106,14 @@ if __name__ == "__main__":
     """
 
     # ----- COMPLETION PERCENTAGE ----- #
+    """
     num_finished_yes = len(df.loc[df["Finished"] == "Yes"])
     completion_percentage = num_finished_yes / num_movies
     #print(completion_percentage)
+    """
 
     # ----- SCORE ----- #
+    """
     # average score per genre
     genre_score_averages = pd.Series(dtype="float32")
     for g in genres:
@@ -135,20 +138,24 @@ if __name__ == "__main__":
         ax.annotate(f'{genre_score_averages[i]:.04f}', (i-0.1, genre_score_averages[i]+0.001))
 
     plt.savefig("bar_avg_score")
-    quit()
+    """
 
     # ----- STREAMING SERVICE ----- #
     # number per streaming service
     platforms = [
         "Hulu",
         "Netflix",
-        "Peacock"
+        "Peacock",
+        "Theatre",
+        "Other"
     ]
 
     platform_counts = {
         "Hulu": 0,
         "Netflix": 0,
-        "Peacock": 0
+        "Peacock": 0,
+        "Theatre": 0,
+        "Other": 0
     }
 
     temp_sum = 0
@@ -158,11 +165,78 @@ if __name__ == "__main__":
         temp_sum += platform_count
 
     # Other
-    platform_counts["Other"] = num_movies - temp_sum
+    #platform_counts["Other"] = num_movies - temp_sum
 
-    #print(platform_counts)
+    print(platform_counts)
+
+    # racing bar
+    """
+    plt.style.use("dark_background")
+    fig, ax = plt.subplots(figsize=(15, 10))
+    #colours = cm.rainbow(np.linspace(0, 1, len(genres)))
+    colours = ["green", "red", "purple", "blue", "orange"]
+
+    def draw_chart(frame):
+        df = pd.read_csv(DATA_CSV_FILEPATH)
+        df = df.head(frame)
+
+        platform_counts = {
+            "Hulu": 0,
+            "Netflix": 0,
+            "Peacock": 0,
+            "Theatre": 0,
+            "Other": 0
+        }
+
+        platform_df = pd.DataFrame(platform_counts.items(), columns=["Platform", "Count"])
+
+        for index, row in df.iterrows():
+            p = row["Platform"]
+            platform_df.loc[platform_df["Platform"] == p, "Count"] += 1
+
+        platform_df["Rank"] = platform_df["Count"].rank(method="first")
+
+        # plot
+        ax.clear()
+        ax.barh(platform_df["Rank"], platform_df["Count"], color=colours)
+        ax.set_title("Count by platform service")
+
+        [spine.set_visible(False) for spine in ax.spines.values()]  # remove border around figure
+        ax.get_xaxis().set_visible(False)  # hide x-axis
+        ax.get_yaxis().set_visible(False)  # hide y-axis
+
+        for index, row in platform_df.iterrows():
+            ax.text(x=0, y=row["Rank"], s=str(row["Platform"]), ha="right", va="center")  # base axis
+            ax.text(x=row["Count"] + 0.01, y=row["Rank"] + 0.01, s=row["Count"], ha="left", va="center")  # bar
+
+
+    gif_filepath = os.path.join(os.getcwd(), "racing_bar_platform.gif")
+    animator = animation.FuncAnimation(fig, draw_chart, frames=range(len(df)), interval=300)
+    animator.save(gif_filepath, writer="imagemagick")
+    """
 
     # pie chart streaming service
+    """
+    # fractions
+    fractions = {}
+    for p in platform_counts:
+        fractions[p] = platform_counts[p] / num_movies
+
+    #print(platform_counts)
+    print(fractions)
+    fractions = [v for k, v in fractions.items()]
+
+    def fraction_str(value):
+        value = f'{value:.1f}'
+        return value
+
+    plt.style.use("dark_background")
+    plt.figure(figsize=(15, 10))
+    colours = ["green", "red", "purple", "blue", "orange"]
+    plt.pie(fractions, colors=colours, labels=platforms, autopct=fraction_str, pctdistance=1.1, labeldistance=None)
+    plt.legend()
+    plt.savefig("pie_platform")
+    """
 
     # ----- FIRST LETTER ----- #
     # number per first letter in title
@@ -181,8 +255,59 @@ if __name__ == "__main__":
 
     print(letter_counts)
 
-    # plot
+    # plot static bar
+    l_df = pd.Series(letter_counts)
+    plt.style.use("dark_background")
+    fig, ax = plt.subplots(figsize=(15, 10))
+    colours = cm.rainbow(np.linspace(0, 1, len(letter_counts)))
+    ax.clear()
+    ax.bar(letter_counts.keys(), letter_counts.values(), color=colours)
+    ax.set_title("Count by 'first letter'")
+
+    for i in range(len(l_df)):
+        #print(l_df[i])
+        ax.annotate(f'{l_df[i]}', (i-0.2, l_df[i]+0.01))
+
+    plt.savefig("bar_letter")
 
     # racing bar
+    """
+    plt.style.use("dark_background")
+    fig, ax = plt.subplots(figsize=(15, 10))
+    colours = cm.rainbow(np.linspace(0, 1, len(letter_counts)))
+
+    def draw_chart(frame):
+        df = pd.read_csv(DATA_CSV_FILEPATH)
+        df = df.head(frame)
+
+        counts = {}
+        for c in letter_counts:
+            counts[c] = 0
+
+        count_df = pd.DataFrame(counts.items(), columns=["AN", "Count"])
+
+        for index, row in df.iterrows():
+            c = row["Title"][0]
+            count_df.loc[count_df["AN"] == c, "Count"] += 1
+
+        count_df["Rank"] = count_df["Count"].rank(method="first")
+        count_df = count_df.head(min(len(df), 10))
+
+        ax.clear()
+        ax.barh(count_df["Rank"], count_df["Count"], color=colours)
+        ax.set_title("Count by 'first letter'")
+
+        [spine.set_visible(False) for spine in ax.spines.values()]  # remove border around figure
+        ax.get_xaxis().set_visible(False)  # hide x-axis
+        ax.get_yaxis().set_visible(False)  # hide y-axis
+
+        for index, row in count_df.iterrows():
+            ax.text(x=0, y=row["Rank"], s=str(row["AN"]), ha="right", va="center")  # base axis
+            ax.text(x=row["Count"] + 0.01, y=row["Rank"] + 0.01, s=row["Count"], ha="left", va="center")  # bar
+
+    gif_filepath = os.path.join(os.getcwd(), "racing_bar_letter.gif")
+    animator = animation.FuncAnimation(fig, draw_chart, frames=range(len(df)), interval=300)
+    animator.save(gif_filepath, writer="imagemagick")
+    """
 
     quit()
