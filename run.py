@@ -46,7 +46,61 @@ def get_genre_counts(dataframe):
     return counts
 
 
-# racing bar
+def get_genre_score_averages(dataframe, genres):
+    averages = pd.Series(dtype="float32")
+    for g in genres:
+        genre = dataframe.loc[df["Genre"] == g]
+        scores = pd.Series(genre["Score"])
+        averages[g] = scores.mean()
+
+    return averages
+
+
+# platforms
+def get_platform_counts(platforms):
+    counts = {}
+    for p in platforms:
+        counts[p] = len(df.loc[df["Platform"] == p])
+
+    return counts
+
+
+# alphanumeric character counts
+def get_char_counts(dataframe):
+    letters = list(string.ascii_uppercase)
+    digits = list(string.digits)
+    alphanumeric = letters + digits
+
+    counts = {}
+    for c in alphanumeric:
+        counts[c] = 0
+
+    for index, row in dataframe.iterrows():
+        c = row["Title"][0]
+        counts[c] += 1
+
+    return counts
+
+
+# plot bar chart
+def plot_bar(keys, values, title, ylabel, filename, save_dir):
+    plt.style.use("dark_background")
+    fig, ax = plt.subplots(figsize=(15, 10))
+    colours = cm.rainbow(np.linspace(0, 1, len(keys)))
+    ax.clear()
+    ax.bar(keys, values, color=colours)
+    ax.set_title(title)
+    ax.set_ylabel(ylabel)
+
+    for i in range(len(values)):
+        #ax.annotate(f'{values[i]:.04f}', (i-0.1, values[i]+0.001))
+        ax.annotate(f'{values[i]}', (i - 0.2, values[i] + 0.001))
+        #ax.annotate(f'{genre_score_averages[i]:.04f}', (i - 0.1, genre_score_averages[i] + 0.001))
+
+    plt.savefig(os.path.join(save_dir, filename))
+
+
+# plot racing bar chart
 def plot_racing_bar(column, keys, save_dir):
     plt.style.use("dark_background")
     fig, ax = plt.subplots(figsize=(15, 10))
@@ -85,6 +139,15 @@ def plot_racing_bar(column, keys, save_dir):
     animator.save(gif_filepath, writer="imagemagick")
 
 
+# plot pie chart
+def plot_pie(fractions, labels, colours, autopct, filename, save_dir):
+    plt.style.use("dark_background")
+    plt.figure(figsize=(15, 10))
+    plt.pie(fractions, colors=colours, labels=platforms, autopct=fraction_str, pctdistance=1.1, labeldistance=None)
+    plt.legend()
+    plt.savefig(os.path.join(save_dir, filename))
+
+
 ################################################################################
 # Main
 if __name__ == "__main__":
@@ -98,25 +161,96 @@ if __name__ == "__main__":
 
     # number of titles
     num_titles = len(df)
-    print(f'Number of titles: {num_titles}')
+    #print(f'Number of titles: {num_titles}')
 
     # ----- GENRES ----- #
     genres = get_genres(df)
-    print(f'Genres: {genres}')
+    #print(f'Genres: {genres}')
 
     # counts
     genre_counts = get_genre_counts(df)
     genre_counts = pd.Series(genre_counts)
-    print(f'Genre counts: {genre_counts}')
+    #print(f'Genre counts: {genre_counts}')
 
     # genre racing bar chart
-    plot_racing_bar(column="Genre", keys=genres, save_dir=VISUALS_DIR)
+    #plot_racing_bar(column="Genre", keys=genres, save_dir=VISUALS_DIR)
 
+    # ----- COMPLETION PERCENTAGE ----- #
+    num_finished_yes = len(df.loc[df["Finished"] == "Yes"])
+    completion_percentage = num_finished_yes / num_titles
+    #print(f'Completion percentage: {completion_percentage}')
+
+    # ----- SCORE ----- #
+    genre_score_averages = get_genre_score_averages(df, genres)
+    #print(f'Avg Score by Genre: {genre_score_averages}')
+    """
+    plot_bar(
+        keys=genres,
+        values=genre_score_averages,
+        title="Average score per genre",
+        ylabel="Average user score",
+        filename="bar_avg_score",
+        save_dir=VISUALS_DIR
+    )
+    """
+
+    # ----- STREAMING SERVICE ----- #
+    platforms = [
+        "Hulu",
+        "Netflix",
+        "Peacock",
+        "Theatre",
+        "Other"
+    ]
+    platform_counts = get_platform_counts(platforms)
+
+    # racing bar chart
+    #print(f'Platform counts: {platform_counts}')
+    """
+    plot_racing_bar(
+        column="Platform",
+        keys=platforms,
+        save_dir=VISUALS_DIR
+    )
+    """
+
+    # pie chart
+    # fractions
+    fractions = {}
+    for p in platform_counts:
+        fractions[p] = platform_counts[p] / num_titles
+
+    fractions = [v for k, v in fractions.items()]
+
+    def fraction_str(value):
+        value = f'{value:.1f}'
+        return value
+
+    colours = ["green", "red", "purple", "blue", "orange"]
+
+    """
+    plot_pie(
+        fractions=fractions,
+        labels=platforms,
+        colours=colours,
+        autopct=fraction_str,
+        filename="pie_platform",
+        save_dir=VISUALS_DIR
+    )
+    """
+
+    # ----- FIRST LETTER ----- #
+    char_counts = get_char_counts(dataframe=df)
+    #print(f'Character counts: {char_counts}')
+    plot_bar(
+        keys=char_counts.keys(),
+        values=list(char_counts.values()),
+        title="Count by 'first character'",
+        ylabel="",
+        filename="bar_firstChar",
+        save_dir=VISUALS_DIR
+    )
     quit()
-
-    plot_bar()  # feed in data source, saves plot figure
-    plot_racing_bar()
-    plot_pie
 
 
     # plot number per genre
@@ -181,6 +315,7 @@ if __name__ == "__main__":
     """
 
     # ----- SCORE ----- #
+
     """
     # average score per genre
     genre_score_averages = pd.Series(dtype="float32")
