@@ -19,37 +19,105 @@ import matplotlib.animation as animation
 
 
 ################################################################################
-# constants
-DATA_CSV_FILEPATH = os.path.join(os.getcwd(), "data.csv")
+# read in CSV data file
+def get_dataset():
+    data_file = "data.csv"
+    dataset = pd.read_csv(os.path.join(os.getcwd(), data_file))
+    return dataset
+
+
+# genres
+def get_genres(dataframe):
+    g = dataframe["Genre"].unique()
+    g = sorted(g)
+    return g
+
+
+# count by genre
+def get_genre_counts(dataframe):
+    counts = {}
+    for index, row in dataframe.iterrows():
+        try:
+            counts[row["Genre"]] += 1
+
+        except KeyError:
+            counts[row["Genre"]] = 1
+
+    return counts
+
+
+# racing bar
+def plot_racing_bar(column, keys, save_dir):
+    plt.style.use("dark_background")
+    fig, ax = plt.subplots(figsize=(15, 10))
+    colours = cm.rainbow(np.linspace(0, 1, len(keys)))
+
+    def draw_chart(frame):
+        df = get_dataset()
+        df = df.head(frame)
+
+        counts = {}
+        for k in keys:
+            counts[k] = 0
+
+        counts_df = pd.DataFrame(counts.items(), columns=[column, "Count"])
+
+        for index, row in df.iterrows():
+            g = row[column]
+            counts_df.loc[counts_df[column] == g, "Count"] += 1
+
+        counts_df["Rank"] = counts_df["Count"].rank(method="first")
+
+        # plot
+        ax.clear()
+        ax.barh(counts_df["Rank"], counts_df["Count"], color=colours)
+        ax.set_title("Count by " + column)
+        [spine.set_visible(False) for spine in ax.spines.values()]  # remove border around figure
+        ax.get_xaxis().set_visible(False)  # hide x-axis
+        ax.get_yaxis().set_visible(False)  # hide y-axis
+
+        for index, row in counts_df.iterrows():
+            ax.text(x=0, y=row["Rank"], s=str(row[column]), ha="right", va="center")  # base axis
+            ax.text(x=row["Count"] + 0.01, y=row["Rank"] + 0.01, s=row["Count"], ha="left", va="center")  # bar
+
+    gif_filepath = os.path.join(save_dir, "racing_bar_" + column + ".gif")
+    animator = animation.FuncAnimation(fig, draw_chart, frames=range(len(df)), interval=300)
+    animator.save(gif_filepath, writer="imagemagick")
 
 
 ################################################################################
 # Main
 if __name__ == "__main__":
-    df = pd.read_csv(DATA_CSV_FILEPATH)
+    # read in data from file
+    df = get_dataset()
 
-    data = {}
+    # save plot outputs to a directory
+    VISUALS_DIR = os.path.join(os.getcwd(), "visuals")
+    if not os.path.exists(VISUALS_DIR):
+        os.makedirs(VISUALS_DIR)
 
-    # ----- NUMBER OF MOVIES ----- #
-    num_movies = len(df)
-    #print(f'Number of movies: {num_movies}')
+    # number of titles
+    num_titles = len(df)
+    print(f'Number of titles: {num_titles}')
 
     # ----- GENRES ----- #
-    genres = df["Genre"].unique()
-    genres = sorted(genres)  # alphabetize
-    #print(genres)
-    genre_counts = {}
+    genres = get_genres(df)
+    print(f'Genres: {genres}')
 
-    # initialize
-    for g in genres:
-        genre_counts[g] = 0
-
-    for index, row in df.iterrows():
-        genre_counts[row["Genre"]] += 1
-
-    #genre_counts = df["Genre"].value_counts()
+    # counts
+    genre_counts = get_genre_counts(df)
     genre_counts = pd.Series(genre_counts)
-    #print(genre_counts)
+    print(f'Genre counts: {genre_counts}')
+
+    # genre racing bar chart
+    plot_racing_bar(column="Genre", keys=genres, save_dir=VISUALS_DIR)
+
+    quit()
+
+    plot_bar()  # feed in data source, saves plot figure
+    plot_racing_bar()
+    plot_pie
+
 
     # plot number per genre
     """
