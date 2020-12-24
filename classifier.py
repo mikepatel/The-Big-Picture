@@ -16,7 +16,7 @@ import tensorflow as tf
 
 ################################################################################
 # training
-NUM_EPOCHS = 1
+NUM_EPOCHS = 21
 BATCH_SIZE = 16
 
 BUFFER_SIZE = 10000
@@ -26,7 +26,6 @@ MAX_SEQ_LENGTH = 100
 # model
 NUM_RNN_UNITS = 128
 EMBEDDING_DIM = 100
-
 
 
 ################################################################################
