@@ -42,14 +42,21 @@ if __name__ == "__main__":
     csv_filepath = os.path.join(os.getcwd(), csv_filename)
     df = pd.read_csv(csv_filepath)
 
+    # features: titles
+    titles = df["Title"]
+
+    # labels: genres
     # map genre labels to integers
     genres = df["Genre"].unique()
     genres = sorted(genres)
     num_genres = len(genres)
+    genre2int = {v: k for k, v in enumerate(genres)}
     int2genre = {k: v for k, v in enumerate(genres)}
 
+    genres = [genre2int[i] for i in df["Genre"]]
+
     # create a dataset from dataframe
-    dataset = tf.data.Dataset.from_tensor_slices((df["Title"], df["Genre"]))
+    dataset = tf.data.Dataset.from_tensor_slices((titles, genres))
     dataset = dataset.shuffle(buffer_size=BUFFER_SIZE)
     dataset = dataset.batch(batch_size=BATCH_SIZE)
 
@@ -60,18 +67,25 @@ if __name__ == "__main__":
     )
 
     # apply preprocessing to dataset
-    train_text = dataset.map(lambda title, genre: title)  # no genre labels
+    train_text = dataset.map(lambda title, genre: title)  # titles
+    train_labels = dataset.map(lambda title, genre: genre)  # genres
     preprocess_layer.adapt(train_text)
-    vocab = np.array(preprocess_layer.get_vocabulary())  # ordered by frequency
-    #print(vocab[:30])
+    vocab = preprocess_layer.get_vocabulary()  # ordered by frequency
+    vocab_size = len(vocab)
+
+    def vectorize_text(t, g):
+        t = tf.expand_dims(t, axis=-1)
+        return preprocess_layer(t), g
+
+    train_dataset = dataset.map(vectorize_text)
 
     # data pipeline performance: cache and prefetch
-    train_text = train_text.cache().prefetch(buffer_size=BUFFER_SIZE)
+    train_dataset = train_dataset.cache().prefetch(buffer_size=BUFFER_SIZE)
 
     # ----- MODEL ----- #
     model = tf.keras.Sequential()
     model.add(tf.keras.layers.Embedding(
-        input_dim=len(vocab),  # vocab size
+        input_dim=vocab_size+2,  # vocab size
         output_dim=EMBEDDING_DIM
     ))  # (batch, sequence, embedding)
 
@@ -85,5 +99,18 @@ if __name__ == "__main__":
     ))
 
     model.summary()
+
+    # loss function and optimizer
+    model.compile(
+        loss=tf.keras.losses.sparse_categorical_crossentropy,
+        optimizer=tf.keras.optimizers.Adam(),
+        metrics=["accuracy"]
+    )
+
+    # train model
+    history = model.fit(
+        x=train_dataset,
+        epochs=NUM_EPOCHS
+    )
 
     quit()
