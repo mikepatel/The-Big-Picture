@@ -141,5 +141,6 @@ if __name__ == "__main__":
         print()
         print(f'Title: {test_titles[i]}')
         print(f'Genre: {int2genre[np.argmax(predictions[i])]}')
+        print(f'Value: {np.max(predictions[i]):.04f}')
 
     quit()
