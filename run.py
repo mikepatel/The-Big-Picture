@@ -178,7 +178,7 @@ if __name__ == "__main__":
     # ----- COMPLETION PERCENTAGE ----- #
     num_finished_yes = len(df.loc[df["Finished"] == "Yes"])
     completion_percentage = num_finished_yes / num_titles
-    #print(f'Completion percentage: {completion_percentage}')
+    print(f'Completion percentage: {completion_percentage}')
 
     # ----- SCORE ----- #
     genre_score_averages = get_genre_score_averages(df, genres)
@@ -242,6 +242,7 @@ if __name__ == "__main__":
     # ----- FIRST LETTER ----- #
     char_counts = get_char_counts(dataframe=df)
     #print(f'Character counts: {char_counts}')
+    """
     plot_bar(
         keys=char_counts.keys(),
         values=list(char_counts.values()),
@@ -250,6 +251,7 @@ if __name__ == "__main__":
         filename="bar_firstChar",
         save_dir=VISUALS_DIR
     )
+    """
     quit()
 
 
