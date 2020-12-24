@@ -40,32 +40,20 @@ if __name__ == "__main__":
     df = pd.read_csv(csv_filepath)
 
     # create a dataset from dataframe
-    #dataset = tf.data.Dataset.from_tensor_slices((df["Title"], df["Genre"]))
-    dataset = tf.data.experimental.make_csv_dataset(
-        file_pattern=csv_filepath,
-        select_columns=["Title", "Genre"],
-        batch_size=BATCH_SIZE,
-        shuffle=True
-    )
-    print(dataset)
-    """
-    for row in dataset.take(1):
-        for key, value in row.items():
-            print(f'{key} {value}')
-    quit()
-    """
+    dataset = tf.data.Dataset.from_tensor_slices((df["Title"], df["Genre"]))
+    dataset = dataset.shuffle(buffer_size=10000)
+    dataset = dataset.batch(batch_size=1)
 
     # preprocessing: standardization, tokenization, vectorization
     preprocess_layer = tf.keras.layers.experimental.preprocessing.TextVectorization(
-        max_tokens=MAX_WORDS
+        #max_tokens=MAX_WORDS
         #output_sequence_length=MAX_SEQ_LENGTH
     )
 
     # apply preprocessing to dataset
-    train_text = dataset.map(lambda text, label: text)  # no genre labels
-    #train_text = dataset
+    train_text = dataset.map(lambda title, genre: title)  # no genre labels
     preprocess_layer.adapt(train_text)
-    vocab = np.array(preprocess_layer.get_vocabulary())
-    print(vocab[:10])
+    vocab = np.array(preprocess_layer.get_vocabulary())  # ordered by frequency
+    print(vocab[:30])
 
     quit()
