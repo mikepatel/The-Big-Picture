@@ -113,4 +113,34 @@ if __name__ == "__main__":
         epochs=NUM_EPOCHS
     )
 
+    # ----- PREDICTION ----- #
+    test_titles = [
+        "Harry Potter and the Prisoner of Azkaban",
+        "Pulp Fiction",
+        "Jaws",
+        "Chinatown",
+        "Anchorman",
+        "The Matrix",
+        "Titanic",
+        "The English Patient",
+        "Power Rangers",
+        "Forrest Gump",
+        "Spiderman 2",
+        "A Nightmare on Elm Street",
+        "Friday the 13th"
+    ]
+
+    # preprocess
+    test_dataset = np.expand_dims(test_titles, axis=-1)
+    test_dataset = preprocess_layer(test_dataset)
+
+    # make predictions
+    predictions = model.predict(test_dataset)
+
+    # print out predictions
+    for i in range(len(predictions)):
+        print()
+        print(f'Title: {test_titles[i]}')
+        print(f'Genre: {int2genre[np.argmax(predictions[i])]}')
+
     quit()
