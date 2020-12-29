@@ -170,7 +170,8 @@ if __name__ == "__main__":
     # counts
     genre_counts = get_genre_counts(df)
     genre_counts = pd.Series(genre_counts)
-    #print(f'Genre counts: {genre_counts}')
+    print(f'Genre counts: {genre_counts}')
+    quit()
 
     # genre racing bar chart
     #plot_racing_bar(column="Genre", keys=genres, save_dir=VISUALS_DIR)
