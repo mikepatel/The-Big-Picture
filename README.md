@@ -3,7 +3,7 @@
 An exploration of one year's worth of user movie data
 
 ## Medium
-< insert Medium link >
+Read the full article [here](https://michaelpatel.medium.com/the-big-picture-a4bcbc63a26f) on Medium
 
 ## File descriptions
 * [classifier.py](https://github.com/mikepatel/The-Big-Picture/blob/main/classifier.py) - text classifier
