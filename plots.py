@@ -83,7 +83,7 @@ def get_char_counts(dataframe):
 
 
 # plot bar chart
-def plot_bar(keys, values, title, ylabel, filename, save_dir):
+def plot_bar(keys, values, title, ylabel, filename, save_dir, feature):
     plt.style.use("dark_background")
     fig, ax = plt.subplots(figsize=(8, 6))
     colours = cm.rainbow(np.linspace(0, 1, len(keys)))
@@ -93,8 +93,11 @@ def plot_bar(keys, values, title, ylabel, filename, save_dir):
     ax.set_ylabel(ylabel)
 
     for i in range(len(values)):
-        #ax.annotate(f'{values[i]:.04f}', (i-0.25, values[i]+0.005))  # avg score per genre
-        ax.annotate(f'{values[i]}', (i-0.4, values[i] + 0.1))  # first letter
+        if feature == "genre":
+            ax.annotate(f'{values[i]:.04f}', (i-0.25, values[i]+0.005))  # avg score per genre
+
+        if feature == "letter":
+            ax.annotate(f'{values[i]}', (i-0.4, values[i] + 0.1))  # first letter
         #ax.annotate(f'{genre_score_averages[i]:.04f}', (i - 0.1, genre_score_averages[i] + 0.001))
 
     plt.savefig(os.path.join(save_dir, filename))
@@ -190,7 +193,8 @@ if __name__ == "__main__":
         title="Average score per genre",
         ylabel="Average user score",
         filename="bar_avg_score",
-        save_dir=VISUALS_DIR
+        save_dir=VISUALS_DIR,
+        feature="genre"
     )
     #"""
 
@@ -249,7 +253,8 @@ if __name__ == "__main__":
         title="Count by 'first character'",
         ylabel="",
         filename="bar_firstChar",
-        save_dir=VISUALS_DIR
+        save_dir=VISUALS_DIR,
+        feature="letter"
     )
     #"""
     quit()
